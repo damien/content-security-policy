@@ -1,0 +1,88 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release'
+        required: true
+        type: string
+      prerelease:
+        description: 'Mark as pre-release'
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            artifact: libcsp_parser-linux.rlib
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            artifact: libcsp_parser-macos.rlib
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifact: csp_parser-windows.rlib
+          - os: ubuntu-latest
+            target: wasm32-unknown-unknown
+            artifact: csp_parser.wasm
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Rust
+        run: |
+          rustup default stable
+          rustup target add ${{ matrix.target }}
+          
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+        
+      - name: Build
+        run: cargo build --release --target ${{ matrix.target }}
+        
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: target/${{ matrix.target }}/release/libcsp_parser.rlib
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ github.event.inputs.version }}
+          name: Release ${{ github.event.inputs.version }}
+          prerelease: ${{ github.event.inputs.prerelease }}
+          draft: false
+          files: |
+            artifacts/libcsp_parser-linux.rlib/libcsp_parser.rlib
+            artifacts/libcsp_parser-macos.rlib/libcsp_parser.rlib
+            artifacts/csp_parser-windows.rlib/libcsp_parser.rlib
+            artifacts/csp_parser.wasm/csp_parser.wasm
