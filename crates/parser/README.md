@@ -8,7 +8,6 @@ A zero-copy, safe Content Security Policy (CSP) Level 3 parser written in Rust u
 - Full CSP Level 3 specification compliance
 - Descriptive error messages with source locations
 - Safe parsing with no panics
-- Clear, maintainable code structure
 
 ## Usage
 
