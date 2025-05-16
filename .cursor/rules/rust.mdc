@@ -1,0 +1,37 @@
+---
+description: 
+globs: crates\**\*.rs
+alwaysApply: false
+---
+For any Rust code that you write:
+
+1. Always verify that `cargo check` passes without errors or warnings.
+2. Always ensure that `cargo test` succeeds
+    a. If a test fails, only remove a test if the test is no longer relevant.
+    b. When removing tests, consider adding new tests if doing so will assist in clarifying intended usage or behavior of untested code.
+    c. When changing or adding new tests, ensure references to code being tested are correct and up to date.
+3. Prefer easy to understand and easy to maintain code that clearly communicates intent and behavior.
+4. When using the `nom` library:
+    a. Use method-style syntax (`.parse(input)`) for public parser interfaces 
+    b. Use function-style syntax (`parser(input)`) for internal parser implementations
+    c. Consider all the available parser combinators documented when modifying a parser: https://github.com/rust-bakery/nom/blob/main/doc/choosing_a_combinator.md
+    d. Consider recommended patterns for error management documented at https://github.com/rust-bakery/nom/blob/main/doc/error_management.md
+    e. Prefer zero-copy parsing where possible to maintain performance
+    f. Use descriptive names for parser functions that indicate their purpose
+    g. Group related parsers in modules to improve code organization
+    h. Document parser behavior, especially for complex parsing rules
+5. For CSP-specific code:
+    a. Follow the CSP Level 3 specification for parsing rules
+    b. Maintain strict validation of CSP directives and values
+    c. Provide clear error messages that help users fix invalid policies
+    d. Consider security implications when parsing sensitive values (nonces, hashes)
+6. For error handling:
+    a. Use custom error types that provide meaningful context
+    b. Include position information in parse errors when possible
+    c. Validate input before parsing to catch obvious errors early
+7. For documentation:
+    a. Document public APIs with examples
+    b. Include references to relevant CSP specification sections
+    c. Document any deviations from the CSP specification
+
+
