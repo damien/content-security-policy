@@ -3,13 +3,55 @@ use nom::{
     bytes::complete::{tag, take_while},
     character::complete::{char, space0, space1},
     combinator::{map, opt},
-    multi::separated_list0,
-    sequence::delimited, Parser,
     error::ParseError as NomParseError,
+    IResult,
+    multi::separated_list0,
+    sequence::delimited,
+    Parser,
 };
 
-use crate::SourceExpression;
 use base64::Engine as _;
+
+/// A source expression as defined in CSP Level 3.
+#[derive(Debug, Clone, PartialEq)]
+pub enum SourceExpression {
+    /// The 'none' keyword source.
+    None,
+    /// The 'self' keyword source.
+    Self_,
+    /// The 'unsafe-inline' keyword source.
+    UnsafeInline,
+    /// The 'unsafe-eval' keyword source.
+    UnsafeEval,
+    /// The 'unsafe-hashes' keyword source.
+    UnsafeHashes,
+    /// The 'strict-dynamic' keyword source.
+    StrictDynamic,
+    /// The 'report-sample' keyword source.
+    ReportSample,
+    /// The 'wasm-unsafe-eval' keyword source.
+    WasmUnsafeEval,
+    /// A nonce source expression.
+    Nonce(String),
+    /// A hash source expression with algorithm and value.
+    Hash {
+        /// The hash algorithm (e.g., "sha256", "sha384", "sha512").
+        algorithm: String,
+        /// The hash value.
+        value: String,
+    },
+    /// A scheme source expression.
+    Scheme(String),
+    /// A host source expression.
+    HostSource {
+        /// The host value (e.g., "example.com", "*.example.com").
+        host: String,
+        /// Optional port number.
+        port: Option<u16>,
+        /// Optional path.
+        path: Option<String>,
+    },
+}
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum CspParseError<I> {
@@ -34,7 +76,7 @@ impl<I> NomParseError<I> for CspParseError<I> {
 }
 
 /// Parse a keyword source expression.
-fn parse_keyword(input: &str) -> nom::IResult<&str, SourceExpression, CspParseError<&str>> {
+fn parse_keyword(input: &str) -> IResult<&str, SourceExpression, CspParseError<&str>> {
     let res = alt((
         map(tag("'none'"), |_| SourceExpression::None),
         map(tag("'self'"), |_| SourceExpression::Self_),
@@ -68,7 +110,7 @@ fn parse_nonce(input: &str) -> nom::IResult<&str, SourceExpression, CspParseErro
 }
 
 /// Parse a hash source expression.
-fn parse_hash(input: &str) -> nom::IResult<&str, SourceExpression, CspParseError<&str>> {
+fn parse_hash(input: &str) -> IResult<&str, SourceExpression, CspParseError<&str>> {
     let (input, _) = char('\'').parse(input)?;
     let (input, algorithm) = alt((
         tag("sha256-"),
@@ -88,7 +130,7 @@ fn parse_hash(input: &str) -> nom::IResult<&str, SourceExpression, CspParseError
 }
 
 /// Parse a scheme+host source expression.
-fn parse_scheme_host(input: &str) -> nom::IResult<&str, SourceExpression, CspParseError<&str>> {
+fn parse_scheme_host(input: &str) -> IResult<&str, SourceExpression, CspParseError<&str>> {
     // Parse <scheme>://<host>[:port][/path]
     let (input, scheme) = take_while(|c: char| c.is_alphanumeric() || c == '+' || c == '-' || c == '.').parse(input)?;
     if scheme.is_empty() {
@@ -221,7 +263,7 @@ pub fn parse_source_expression(input: &str) -> nom::IResult<&str, SourceExpressi
 /// Parse a source list.
 pub fn parse_source_list(input: &str) -> nom::IResult<&str, Vec<SourceExpression>, CspParseError<&str>> {
     let trimmed = input.trim();
-    if trimmed.is_empty() || trimmed.starts_with(';') {
+    if trimmed.is_empty() {
         return Ok((trimmed, vec![]));
     }
     let (input, sources) = separated_list0(space1, parse_source_expression).parse(input)?;
@@ -299,4 +341,4 @@ mod tests {
             ]))
         );
     }
-} 
+}
