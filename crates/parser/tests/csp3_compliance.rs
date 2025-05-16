@@ -9,7 +9,7 @@ mod source_lists {
     //! defined in the CSP Level 3 specification, including keywords, URLs, schemes,
     //! hosts, nonces, and hashes.
 
-    use csp_parser::{Policy, SourceExpression, ParseError};
+    use parser::{Policy, SourceExpression, ParseError};
 
     #[test]
     fn test_keyword_sources() {
@@ -110,7 +110,7 @@ mod url_matching {
     //! defined in the CSP Level 3 specification, including scheme matching,
     //! self matching, wildcard hosts, paths, and ports.
 
-    use csp_parser::{Policy, SourceExpression, ParseError};
+    use parser::{Policy, SourceExpression, ParseError};
 
     #[test]
     fn test_scheme_matching() {
@@ -189,7 +189,7 @@ mod directives {
     //! These tests verify that the parser correctly handles all CSP Level 3 directives,
     //! including core directives, new directives, and error cases.
 
-    use csp_parser::{Policy, ParseError};
+    use parser::{Policy, ParseError};
 
     #[test]
     fn test_script_directives() {
@@ -276,7 +276,7 @@ mod script_src {
     //! These tests verify that the parser correctly handles all valid source expressions
     //! for the script-src directive, which controls which scripts can be executed.
 
-    use csp_parser::{Policy, SourceExpression, ParseError};
+    use parser::{Policy, SourceExpression, ParseError};
 
     #[test]
     fn test_script_src_keywords() {
