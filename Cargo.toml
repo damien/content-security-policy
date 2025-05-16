@@ -4,4 +4,4 @@ members = ["crates/*"]
 
 [workspace.dependencies]
 base64 = "0.22.1"
-nom = "8.0.0"
+nom = "8"
