@@ -72,31 +72,31 @@ impl fmt::Display for ParseError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             ParseError::InvalidDirective { name, position } => {
-                write!(f, "Invalid directive '{}' at position {}", name, position)
+                write!(f, "Invalid directive '{name}' at position {position}")
             }
             ParseError::InvalidSource { value, position } => {
-                write!(f, "Invalid source '{}' at position {}", value, position)
+                write!(f, "Invalid source '{value}' at position {position}")
             }
             ParseError::DuplicateDirective { name, position } => {
-                write!(f, "Duplicate directive '{}' at position {}", name, position)
+                write!(f, "Duplicate directive '{name}' at position {position}")
             }
             ParseError::MissingValue { directive, position } => {
-                write!(f, "Missing value for directive '{}' at position {}", directive, position)
+                write!(f, "Missing value for directive '{directive}' at position {position}")
             }
             ParseError::InvalidHost { value, position } => {
-                write!(f, "Invalid host '{}' at position {}", value, position)
+                write!(f, "Invalid host '{value}' at position {position}")
             }
             ParseError::InvalidPort { value, position } => {
-                write!(f, "Invalid port '{}' at position {}", value, position)
+                write!(f, "Invalid port '{value}' at position {position}")
             }
             ParseError::InvalidPath { value, position } => {
-                write!(f, "Invalid path '{}' at position {}", value, position)
+                write!(f, "Invalid path '{value}' at position {position}")
             }
             ParseError::InvalidNonce { value, position } => {
-                write!(f, "Invalid nonce '{}' at position {}", value, position)
+                write!(f, "Invalid nonce '{value}' at position {position}")
             }
             ParseError::InvalidHash { value, position } => {
-                write!(f, "Invalid hash '{}' at position {}", value, position)
+                write!(f, "Invalid hash '{value}' at position {position}")
             }
         }
     }

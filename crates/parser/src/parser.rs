@@ -147,7 +147,7 @@ fn parse_scheme_host(input: &str) -> IResult<&str, SourceExpression, CspParseErr
     }
     let (input, port) = opt(delimited(
         char(':'),
-        take_while(|c: char| c.is_digit(10)),
+        take_while(|c: char| c.is_ascii_digit()),
         space0,
     )).parse(input)?;
     let port = match port {
@@ -174,7 +174,7 @@ fn parse_scheme_host(input: &str) -> IResult<&str, SourceExpression, CspParseErr
             if p.split('/').any(|seg| seg == "..") {
                 return Err(nom::Err::Failure(CspParseError::InvalidPath { value: "/../path".to_string(), input }));
             }
-            Some(format!("/{}", p))
+            Some(format!("/{p}"))
         }
         None => None,
     };
@@ -196,7 +196,7 @@ fn parse_host(input: &str) -> nom::IResult<&str, SourceExpression, CspParseError
     }
     let (input, port) = opt(delimited(
         char(':'),
-        take_while(|c: char| c.is_digit(10)),
+        take_while(|c: char| c.is_ascii_digit()),
         space0,
     )).parse(input)?;
     let port = match port {
@@ -223,7 +223,7 @@ fn parse_host(input: &str) -> nom::IResult<&str, SourceExpression, CspParseError
             if p.split('/').any(|seg| seg == "..") {
                 return Err(nom::Err::Failure(CspParseError::InvalidPath { value: "/../path".to_string(), input }));
             }
-            Some(format!("/{}", p))
+            Some(format!("/{p}"))
         }
         None => None,
     };
@@ -243,7 +243,7 @@ fn parse_scheme(input: &str) -> nom::IResult<&str, SourceExpression, CspParseErr
     // Require ':' not followed by '/' or a digit
     let (input, _) = char(':').parse(input)?;
     if input.starts_with('/') || input.chars().next().map(|c| c.is_ascii_digit()).unwrap_or(false) {
-        return Err(nom::Err::Error(CspParseError::InvalidSource { value: format!("{}:{}", scheme, input), input }));
+        return Err(nom::Err::Error(CspParseError::InvalidSource { value: format!("{scheme}:{input}"), input }));
     }
     Ok((input, SourceExpression::Scheme(scheme.to_string())))
 }
