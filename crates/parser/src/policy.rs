@@ -1,9 +1,12 @@
-use nom::IResult;
-use nom::character::complete::space0;
+use nom::{
+    character::complete::space0,
+    IResult,
+};
 
-use crate::directive::{Directive, parse_directive};
-use crate::error::ParseError;
-use crate::parser::CspParseError;
+use crate::{
+    directive::{Directive, parse_directive},
+    error::ParseError,
+};
 
 /// A Content Security Policy as defined in CSP Level 3.
 #[derive(Debug, Clone, PartialEq)]
@@ -14,7 +17,7 @@ pub struct Policy {
 
 impl Policy {
     /// Parse a CSP policy string.
-    fn parse_policy(input: &str) -> IResult<&str, Policy, CspParseError<&str>> {
+    fn parse_policy(input: &str) -> IResult<&str, Policy, ParseError> {
         let mut directives = Vec::new();
         let mut seen_directives = std::collections::HashSet::new();
         let mut input = input;
@@ -23,9 +26,9 @@ impl Policy {
             let (rest, directive) = parse_directive(input)?;
             let name = directive.name.clone();
             if !seen_directives.insert(name) {
-                return Err(nom::Err::Failure(CspParseError::DuplicateDirective {
+                return Err(nom::Err::Failure(ParseError::DuplicateDirective {
                     name: directive.name,
-                    input,
+                    position: 0,
                 }));
             }
             directives.push(directive);
@@ -40,53 +43,11 @@ impl Policy {
     pub fn parse(input: &str) -> Result<Policy, ParseError> {
         match Self::parse_policy(input) {
             Ok((_, policy)) => Ok(policy),
-            Err(nom::Err::Error(e)) | Err(nom::Err::Failure(e)) => {
-                use crate::parser::CspParseError;
-                match e {
-                    CspParseError::InvalidDirective { name, .. } => Err(ParseError::InvalidDirective {
-                        name,
-                        position: 0,
-                    }),
-                    CspParseError::DuplicateDirective { name, .. } => Err(ParseError::DuplicateDirective {
-                        name,
-                        position: 0,
-                    }),
-                    CspParseError::MissingValue { directive, .. } => Err(ParseError::MissingValue {
-                        directive,
-                        position: 0,
-                    }),
-                    CspParseError::InvalidHost { value, .. } => Err(ParseError::InvalidHost {
-                        value,
-                        position: 0,
-                    }),
-                    CspParseError::InvalidPort { value, .. } => Err(ParseError::InvalidPort {
-                        value,
-                        position: 0,
-                    }),
-                    CspParseError::InvalidPath { value, .. } => Err(ParseError::InvalidPath {
-                        value,
-                        position: 0,
-                    }),
-                    CspParseError::InvalidNonce { value, .. } => Err(ParseError::InvalidNonce {
-                        value,
-                        position: 0,
-                    }),
-                    CspParseError::InvalidHash { value, .. } => Err(ParseError::InvalidHash {
-                        value,
-                        position: 0,
-                    }),
-                    CspParseError::InvalidSource { value, .. } => Err(ParseError::InvalidSource {
-                        value,
-                        position: 0,
-                    }),
-                }
-            }
-            Err(nom::Err::Incomplete(_)) => {
-                Err(ParseError::InvalidSource {
-                    value: input.to_string(),
-                    position: 0,
-                })
-            }
+            Err(nom::Err::Error(e)) | Err(nom::Err::Failure(e)) => Err(e),
+            Err(nom::Err::Incomplete(_)) => Err(ParseError::InvalidSource {
+                value: input.to_string(),
+                position: 0,
+            }),
         }
     }
 }
@@ -130,5 +91,17 @@ mod tests {
     #[test]
     fn test_policy_parse_duplicate() {
         assert!(Policy::parse("default-src 'self'; default-src 'none'").is_err());
+    }
+
+    #[test]
+    fn test_policy_parse_empty() {
+        let policy = Policy::parse("").unwrap();
+        assert_eq!(policy.directives.len(), 0);
+    }
+
+    #[test]
+    fn test_policy_parse_whitespace() {
+        let policy = Policy::parse("   ").unwrap();
+        assert_eq!(policy.directives.len(), 0);
     }
 } 

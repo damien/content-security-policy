@@ -102,4 +102,17 @@ impl fmt::Display for ParseError {
     }
 }
 
-impl std::error::Error for ParseError {} 
+impl std::error::Error for ParseError {}
+
+impl<I> nom::error::ParseError<I> for ParseError {
+    fn from_error_kind(_input: I, _kind: nom::error::ErrorKind) -> Self {
+        ParseError::InvalidSource { 
+            value: "unknown".to_string(), 
+            position: 0 
+        }
+    }
+
+    fn append(_input: I, _kind: nom::error::ErrorKind, other: Self) -> Self {
+        other
+    }
+} 
