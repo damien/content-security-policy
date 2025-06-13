@@ -1,5 +1,3 @@
-use crate::error::ParseError;
-
 #[derive(Debug, PartialEq)]
 enum DirectiveCategory {
     Document,   // https://www.w3.org/TR/CSP3/#directives-document
