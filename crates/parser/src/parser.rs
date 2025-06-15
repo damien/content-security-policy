@@ -7,27 +7,39 @@ use nom::{
     sequence::delimited,
     Parser,
 };
+use serde::{Serialize, Deserialize};
 
 use crate::error::ParseError;
 
 /// A source expression as defined in CSP Level 3.
-#[derive(Debug, Clone, PartialEq)]
+/// Keyword sources can be found at:
+///   * https://www.w3.org/TR/CSP3/#grammardef-serialized-source-list
+///   * https://www.w3.org/TR/CSP3/#grammardef-keyword-source
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum SourceExpression {
     /// The 'none' keyword source.
+    #[serde(rename = "'none'")]
     None,
     /// The 'self' keyword source.
+    #[serde(rename = "'self'")]
     Self_,
     /// The 'unsafe-inline' keyword source.
+    #[serde(rename = "'unsafe-inline'")]
     UnsafeInline,
     /// The 'unsafe-eval' keyword source.
+    #[serde(rename = "'unsafe-eval'")]
     UnsafeEval,
     /// The 'unsafe-hashes' keyword source.
+    #[serde(rename = "'unsafe-hashes'")]
     UnsafeHashes,
     /// The 'strict-dynamic' keyword source.
+    #[serde(rename = "'strict-dynamic'")]
     StrictDynamic,
     /// The 'report-sample' keyword source.
+    #[serde(rename = "'report-sample'")]
     ReportSample,
     /// The 'wasm-unsafe-eval' keyword source.
+    #[serde(rename = "'wasm-unsafe-eval'")]
     WasmUnsafeEval,
     /// A nonce source expression.
     Nonce(String),

@@ -10,5 +10,7 @@ keywords = ["content-security-policy", "csp", "security", "parser", "nom", "cli"
 categories = ["parser-implementations", "security", "cli"]
 
 [dependencies]
-clap = { version = "4.5.40", features = ["derive"] }
+clap = { workspace = true }
 parser = { path = "../parser" }
+serde = { workspace = true }
+serde_json = { workspace = true }

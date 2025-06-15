@@ -2,6 +2,7 @@ use nom::{
     character::complete::space0,
     IResult,
 };
+use serde::{Serialize, Deserialize};
 
 use crate::{
     directive::{Directive, parse_directive},
@@ -9,7 +10,7 @@ use crate::{
 };
 
 /// A Content Security Policy as defined in CSP Level 3.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Policy {
     /// The ordered set of directives that define the policy's implications.
     pub directives: Vec<Directive>,

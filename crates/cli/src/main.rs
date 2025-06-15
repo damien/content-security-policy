@@ -1,10 +1,19 @@
-use clap::Parser;
+use clap::{Parser, ValueEnum};
 use parser::{ParseError, Policy};
+use serde_json;
+
+#[derive(Clone, ValueEnum)]
+enum Format {
+    Json,
+    Text,
+}
 
 #[derive(Parser)]
 struct Args {
     #[arg(short, long)]
     policy: String,
+    #[arg(short, long, value_enum)]
+    format: Option<Format>,
 }
 
 fn main() -> Result<(), String> {
@@ -13,7 +22,10 @@ fn main() -> Result<(), String> {
 
     match policy {
         Ok(policy) => {
-            println!("{:?}", policy);
+            match args.format {
+                Some(Format::Json) => println!("{}", serde_json::to_string(&policy).unwrap()),
+                None | Some(Format::Text) => println!("{:?}", policy),
+            }
             Ok(())
         },
         Err(e) => {

@@ -1,5 +1,3 @@
-use crate::{SourceExpression, error::ParseError};
-use super::parser::parse_source_list;
 use nom::{
     bytes::complete::{tag, take_while},
     character::complete::space0,
@@ -7,11 +5,18 @@ use nom::{
     IResult,
     Parser,
 };
+use serde::{Serialize, Deserialize};
 
-use crate::specification::DirectiveInfo;
+use crate::{
+    error::ParseError,
+    SourceExpression,
+    specification::DirectiveInfo,
+};
+
+use super::parser::parse_source_list;
 
 /// A directive within a Content Security Policy.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Directive {
     /// The directive name (e.g., "default-src", "script-src").
     pub name: String,
