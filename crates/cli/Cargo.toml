@@ -1,0 +1,14 @@
+[package]
+name = "cli"
+version = "0.1.0"
+edition = "2024"
+description = "A zero-copy, safe Content Security Policy (CSP) Level 3 parser"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/damien/content-security-policy"
+readme = "README.md"
+keywords = ["content-security-policy", "csp", "security", "parser", "nom", "cli"]
+categories = ["parser-implementations", "security", "cli"]
+
+[dependencies]
+clap = { version = "4.5.40", features = ["derive"] }
+parser = { path = "../parser" }
