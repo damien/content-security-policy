@@ -40,7 +40,7 @@ pub fn parse_directive(input: &str) -> IResult<&str, Directive, ParseError> {
     if !validate_directive_name(name) {
         return Err(nom::Err::Failure(ParseError::InvalidDirective { 
             name: name.to_string(), 
-            position: 0 
+            position: 0 // Position will be adjusted in the parse_policy function
         }));
     }
 
@@ -52,7 +52,7 @@ pub fn parse_directive(input: &str) -> IResult<&str, Directive, ParseError> {
     if is_fetch_directive(name) && source_list.is_empty() {
         return Err(nom::Err::Failure(ParseError::MissingValue { 
             directive: name.to_string(), 
-            position: 0 
+            position: 0 // Position will be adjusted in the parse_policy function
         }));
     }
     Ok((input, Directive {

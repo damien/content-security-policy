@@ -31,23 +31,63 @@ impl Policy {
         let mut directives = Vec::new();
         let mut seen_directives = std::collections::HashSet::new();
         let mut remaining_input = input;
+        let original_input = input;
 
         // Continue parsing directives until the remainder of the CSP policy string is empty
         while !remaining_input.trim().is_empty() {
-            let (after_directive, directive) = parse_directive(remaining_input)?;
+            // Calculate current position in the input string
+            let current_position = original_input.len() - remaining_input.len();
 
-            // The CSP specification does not allow duplicate directives
-            if !seen_directives.insert(directive.name.clone()) {
-                return Err(nom::Err::Failure(ParseError::DuplicateDirective {
-                    name: directive.name,
-                    position: input.len() - remaining_input.len(), // Calculate actual position
-                }));
+            match parse_directive(remaining_input) {
+                Ok((after_directive, directive)) => {
+                    // The CSP specification does not allow duplicate directives
+                    if !seen_directives.insert(directive.name.clone()) {
+                        return Err(nom::Err::Failure(ParseError::DuplicateDirective {
+                            name: directive.name,
+                            position: current_position,
+                        }));
+                    }
+
+                    directives.push(directive);
+
+                    let (after_whitespace, _) = space0(after_directive)?;
+                    remaining_input = after_whitespace;
+                },
+                Err(nom::Err::Error(mut e)) | Err(nom::Err::Failure(mut e)) => {
+                    // Adjust position in error to be relative to start of policy string
+                    match &mut e {
+                        ParseError::InvalidDirective { position, .. } => {
+                            *position += current_position;
+                        },
+                        ParseError::InvalidSource { position, .. } => {
+                            *position += current_position;
+                        },
+                        ParseError::DuplicateDirective { position, .. } => {
+                            *position += current_position;
+                        },
+                        ParseError::MissingValue { position, .. } => {
+                            *position += current_position;
+                        },
+                        ParseError::InvalidHost { position, .. } => {
+                            *position += current_position;
+                        },
+                        ParseError::InvalidPort { position, .. } => {
+                            *position += current_position;
+                        },
+                        ParseError::InvalidPath { position, .. } => {
+                            *position += current_position;
+                        },
+                        ParseError::InvalidNonce { position, .. } => {
+                            *position += current_position;
+                        },
+                        ParseError::InvalidHash { position, .. } => {
+                            *position += current_position;
+                        },
+                    }
+                    return Err(nom::Err::Failure(e));
+                },
+                Err(e) => return Err(e),
             }
-
-            directives.push(directive);
-
-            let (after_whitespace, _) = space0(after_directive)?;
-            remaining_input = after_whitespace;
         }
 
         Ok((remaining_input, Policy { directives }))
