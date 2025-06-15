@@ -68,6 +68,22 @@ pub enum ParseError {
     },
 }
 
+impl ParseError {
+    pub fn position(&self) -> usize {
+        match self {
+            ParseError::InvalidDirective { position, .. }
+            | ParseError::InvalidSource { position, .. }
+            | ParseError::DuplicateDirective { position, .. }
+            | ParseError::MissingValue { position, .. }
+            | ParseError::InvalidHost { position, .. }
+            | ParseError::InvalidPort { position, .. }
+            | ParseError::InvalidPath { position, .. }
+            | ParseError::InvalidNonce { position, .. }
+            | ParseError::InvalidHash { position, .. }=> *position
+        }
+    }
+}
+
 impl fmt::Display for ParseError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
